@@ -4,7 +4,7 @@
 
 # NOTE: update all FROM when changing epics-base version
 # This is not DRY but allows github dependabot to manage the versions
-FROM  ghcr.io/epics-containers/epics-base:1.1.0 AS developer
+FROM  ghcr.io/epics-containers/epics-base-rtems:0.0.1 AS developer
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
@@ -23,16 +23,16 @@ WORKDIR ${SUPPORT}
 # initialize the global support/configure/RELEASE
 RUN python3 module.py init
 
+# TODO decide on modules needed for rtems
 # get basic support modules in order of dependencies
 RUN python3 module.py add-tar http://www-csr.bessy.de/control/SoftDist/sequencer/releases/seq-{TAG}.tar.gz seq SNCSEQ 2.2.9 && \
-    python3 module.py add epics-modules sscan SSCAN R2-11-5 && \
-    python3 module.py add epics-modules calc CALC R3-7-4 && \
-    python3 module.py add epics-modules asyn ASYN R4-42 && \
-    python3 module.py add epics-modules alive ALIVE R1-3-1 && \
-    python3 module.py add epics-modules autosave AUTOSAVE  R5-10-2 && \
+    # python3 module.py add epics-modules sscan SSCAN R2-11-5 && \
+    # python3 module.py add epics-modules calc CALC R3-7-4 && \
+    # python3 module.py add epics-modules alive ALIVE R1-3-1 && \
+    # python3 module.py add epics-modules autosave AUTOSAVE  R5-10-2 && \
     python3 module.py add epics-modules busy BUSY R1-7-3 && \
-    python3 module.py add epics-modules iocStats DEVIOCSTATS 3.1.16 && \
-    python3 module.py add epics-modules std STD R3-6-3 && \
+    # python3 module.py add epics-modules iocStats DEVIOCSTATS 3.1.16 && \
+    # python3 module.py add epics-modules std STD R3-6-3 && \
     python3 module.py add paulscherrerinstitute StreamDevice STREAM 2.8.22
 
 # patch support modules and fix up all dependencies
@@ -49,7 +49,8 @@ RUN make && \
 
 ##### runtime stage ############################################################
 
-FROM ghcr.io/epics-containers/epics-base:1.1.0.run AS runtime
+# TODO add runtime target to epics-base-rtems and use that here:
+FROM ghcr.io/epics-containers/epics-base-rtems:0.0.1 AS runtime
 
 # install runtime libraries from additional packages section above
 # also add busybox to aid debugging the runtime image
